@@ -1,0 +1,6 @@
+/AppDir
+/dist
+/Installers
+/Output
+/build
+*.log

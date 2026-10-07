@@ -1,0 +1,5 @@
+PySide6
+numpy
+pyserial
+opencv-python-headless
+pyinstaller
