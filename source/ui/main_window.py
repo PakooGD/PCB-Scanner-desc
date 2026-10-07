@@ -33,6 +33,8 @@ from source.services.capture_worker import UiSignals, run_scan, run_demo
 from source.ui.capture_grid import CaptureGrid
 from source.ui.icons import make_play_icon, make_stop_icon
 from source.ui import styles
+from source.ui.dxf_panel import DxfPanel
+
 
 
 class MainWindow(QMainWindow):
@@ -106,6 +108,7 @@ class MainWindow(QMainWindow):
         self._build_camera_group(lv)
         self._build_scan_group(lv)
         self._build_captures_group(lv)
+        self._build_dxf_group(lv)
         lv.addStretch(1)
 
         # --- right side ---
@@ -397,6 +400,10 @@ class MainWindow(QMainWindow):
         cpv.addLayout(row)
         parent_layout.addWidget(self.gb_cap)
 
+    def _build_dxf_group(self, parent_layout):
+        self.dxf_panel = DxfPanel()
+        parent_layout.addWidget(self.dxf_panel)
+
     # ---------- logo ----------
     def _load_logo(self):
         for name in ("logo.svg", "logo.png", "logo.ico"):
@@ -460,6 +467,9 @@ class MainWindow(QMainWindow):
 
         if self.state.grbl is None:
             self.lbl_grbl_status.setText(t("disconnected"))
+        
+        if hasattr(self, "dxf_panel"):
+            self.dxf_panel.retranslate()
 
     def _toggle_lang(self):
         new = toggle_lang()
