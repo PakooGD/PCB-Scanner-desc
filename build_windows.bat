@@ -3,15 +3,16 @@ setlocal EnableDelayedExpansion
 chcp 65001 >nul
 
 REM ============================================================
-REM  PCB Microscope Scanner - Windows build
-REM  Double-click: builds build\windows\dist-win\pcb-scanner.exe
+REM  PCB Microscope Scanner - Windows build (onedir)
+REM  Double-click: builds build\windows\dist-win\pcb-scanner\pcb-scanner.exe
 REM  and Output\PCB-Scanner-Setup.exe (if Inno Setup is installed).
 REM ============================================================
 
 set "APP_NAME=PCB Microscope Scanner"
-set "APP_VERSION=1.0.0"
+set "APP_VERSION=1.0.1"
 set "APP_PUBLISHER=PCB Microscope"
 set "APP_EXE=pcb-scanner.exe"
+set "APP_DIR=pcb-scanner"
 
 REM %~dp0 always ends with a backslash.
 REM   ROOT    - with trailing backslash, for local file paths (e.g. %ROOT%main.py)
@@ -38,7 +39,7 @@ if errorlevel 1 (
 )
 
 REM --- 1. Required files ---
-for %%F in (main.py requirements.txt static\logo.ico) do (
+for %%F in (main.py requirements.txt source\static\logo.ico) do (
     if not exist "%%F" (
         echo [ERROR] Missing required file: %%F
         pause
@@ -71,7 +72,7 @@ echo [1/3] Preparing spec...
 call :gen_spec
 if errorlevel 1 ( echo [ERROR] spec generation failed & pause & exit /b 1 )
 
-REM --- 5. PyInstaller ---
+REM --- 5. PyInstaller (onedir) ---
 echo [2/3] Running PyInstaller...
 if exist "%BUILD_DIR%\pyi" rmdir /s /q "%BUILD_DIR%\pyi"
 pyinstaller --clean --noconfirm ^
@@ -80,7 +81,13 @@ pyinstaller --clean --noconfirm ^
     "%BUILD_DIR%\pcb-scanner.spec"
 if errorlevel 1 ( echo [ERROR] PyInstaller failed & pause & exit /b 1 )
 
-echo       Binary ready: %DIST_DIR%\%APP_EXE%
+set "BIN_PATH=%DIST_DIR%\%APP_DIR%\%APP_EXE%"
+if not exist "!BIN_PATH!" (
+    echo [ERROR] Expected binary not found: !BIN_PATH!
+    pause
+    exit /b 1
+)
+echo       Binary ready: !BIN_PATH!
 
 REM --- 6. Inno Setup ---
 echo [3/3] Building installer...
@@ -113,16 +120,7 @@ for %%P in (
 if not defined ISCC (
     echo [WARN] Inno Setup not found.
     echo        Install: https://jrsoftware.org/isdl.php
-    echo        Binary is ready at %DIST_DIR%\%APP_EXE%
-    echo.
-    pause
-    exit /b 0
-)
-
-if not defined ISCC (
-    echo [WARN] Inno Setup not found.
-    echo        Install: https://jrsoftware.org/isdl.php
-    echo        Binary is ready at %DIST_DIR%\%APP_EXE%
+    echo        Binary is ready at !BIN_PATH!
     echo.
     pause
     exit /b 0
@@ -138,7 +136,7 @@ echo.
 echo ============================================================
 echo   DONE (Windows)
 echo ============================================================
-echo   Binary:    %DIST_DIR%\%APP_EXE%
+echo   Binary:    !BIN_PATH!
 echo   Installer: %OUT_DIR%\PCB-Scanner-Setup.exe
 echo ============================================================
 echo.
@@ -151,8 +149,8 @@ REM ============================================================
 echo # -*- mode: python ; coding: utf-8 -*-
 echo from pathlib import Path
 echo ROOT = Path^(r"%ROOT_PY%"^)
-echo STATIC = ROOT / "static"
-echo datas = [^(str^(STATIC^), "static"^)] if STATIC.exists^(^) else []
+echo STATIC = ROOT / "source" / "static"
+echo datas = [^(str^(STATIC^), "source/static"^)] if STATIC.exists^(^) else []
 echo icon = None
 echo p = STATIC / "logo.ico"
 echo if p.exists^(^): icon = str^(p^)
@@ -164,9 +162,16 @@ echo     excludes=["tkinter", "matplotlib"],
 echo ^)
 echo pyz = PYZ^(a.pure, a.zipped_data^)
 echo exe = EXE^(
-echo     pyz, a.scripts, a.binaries, a.zipfiles, a.datas, [],
-echo     name="pcb-scanner", debug=False, strip=False, upx=True,
+echo     pyz, a.scripts, [],
+echo     exclude_binaries=True,
+echo     name="pcb-scanner",
+echo     debug=False, strip=False, upx=True,
 echo     console=False, icon=icon,
+echo ^)
+echo coll = COLLECT^(
+echo     exe, a.binaries, a.zipfiles, a.datas,
+echo     strip=False, upx=True, upx_exclude=[],
+echo     name="pcb-scanner",
 echo ^)
 ) > "%BUILD_DIR%\pcb-scanner.spec"
 exit /b 0
@@ -199,7 +204,7 @@ echo Uninstallable=yes
 echo UninstallDisplayName={#AppName}
 echo UninstallDisplayIcon={app}\logo.ico
 echo UninstallFilesDir={app}
-echo SetupIconFile=%ROOT%static\logo.ico
+echo SetupIconFile=%ROOT%source\static\logo.ico
 echo.
 echo [Languages]
 echo Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
@@ -209,9 +214,9 @@ echo [Tasks]
 echo Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 echo.
 echo [Files]
-echo Source: "%DIST_DIR%\%APP_EXE%"; DestDir: "{app}"; Flags: ignoreversion
-echo Source: "%ROOT%static\logo.ico"; DestDir: "{app}"; Flags: ignoreversion
-echo Source: "%ROOT%static\logo.png"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
+echo Source: "%DIST_DIR%\%APP_DIR%\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+echo Source: "%ROOT%source\static\logo.ico"; DestDir: "{app}"; Flags: ignoreversion
+echo Source: "%ROOT%source\static\logo.png"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
 echo.
 echo [Icons]
 echo Name: "{group}\{#AppName}"; Filename: "{app}\{#AppExeName}"; IconFilename: "{app}\logo.ico"
@@ -223,6 +228,7 @@ echo Filename: "{app}\{#AppExeName}"; Description: "{cm:LaunchProgram,{#AppName}
 echo.
 echo [UninstallDelete]
 echo Type: filesandordirs; Name: "{app}\static"
+echo Type: filesandordirs; Name: "{app}\_internal"
 echo Type: files; Name: "{app}\logo.ico"
 echo Type: files; Name: "{app}\logo.png"
 echo.

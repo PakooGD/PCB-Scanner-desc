@@ -21,7 +21,7 @@ set "ROOT_DOCKER=%ROOT:~0,-1%"
 cd /d "%ROOT%"
 
 set "BUILD_DIR=%ROOT%build\linux"
-set "DIST_DIR=%ROOT%dist-linux"
+set "DIST_DIR=%ROOT%build\linux\dist-linux"
 set "OUT_DIR=%ROOT%Output"
 
 echo ============================================================
@@ -45,7 +45,7 @@ if errorlevel 1 (
 )
 
 REM --- 1. Required files ---
-for %%F in (main.py requirements.txt static\logo.png) do (
+for %%F in (main.py requirements.txt source\static\logo.png) do (
     if not exist "%%F" (
         echo [ERROR] Missing required file: %%F
         pause
@@ -84,7 +84,7 @@ if errorlevel 1 ( echo [ERROR] Qt platform plugin libqxcb.so not found & pause &
 REM --- 6. AppImage ---
 echo [4/5] Packaging AppImage...
 if exist "%BUILD_DIR%\AppDir" rmdir /s /q "%BUILD_DIR%\AppDir"
-docker run --rm -v "%ROOT_DOCKER%:/src" -w /src %DOCKER_IMAGE% bash -c "mkdir -p build/linux/AppDir/usr/bin && cp -r build/linux/dist/pcb-scanner/. build/linux/AppDir/usr/bin/ && cp build/linux/pcb-scanner.desktop build/linux/AppDir/pcb-scanner.desktop && linuxdeploy --appdir build/linux/AppDir --executable build/linux/AppDir/usr/bin/pcb-scanner --desktop-file build/linux/pcb-scanner.desktop --icon-file static/logo.png --output appimage"
+docker run --rm -v "%ROOT_DOCKER%:/src" -w /src %DOCKER_IMAGE% bash -c "mkdir -p build/linux/AppDir/usr/bin && cp -r build/linux/dist/pcb-scanner/. build/linux/AppDir/usr/bin/ && cp build/linux/pcb-scanner.desktop build/linux/AppDir/pcb-scanner.desktop && linuxdeploy --appdir build/linux/AppDir --executable build/linux/AppDir/usr/bin/pcb-scanner --desktop-file build/linux/pcb-scanner.desktop --icon-file source/static/logo.png --output appimage"
 if errorlevel 1 ( echo [ERROR] linuxdeploy/appimagetool failed & pause & exit /b 1 )
 
 REM --- 7. Move result to Output ---
@@ -158,8 +158,8 @@ echo # -*- mode: python ; coding: utf-8 -*-
 echo from pathlib import Path
 echo from PyInstaller.utils.hooks import collect_data_files
 echo ROOT = Path^(r"/src"^)
-echo STATIC = ROOT / "static"
-echo datas = [^(str^(STATIC^), "static"^)] if STATIC.exists^(^) else []
+echo STATIC = ROOT / "source" / "static"
+echo datas = [^(str^(STATIC^), "source/static"^)] if STATIC.exists^(^) else []
 echo datas += collect_data_files^("PySide6", includes=["Qt/plugins/**/*"], excludes=["**/*.debug","**/*.pdb"]^)
 echo hiddenimports = ["PySide6.QtCore","PySide6.QtGui","PySide6.QtWidgets","PySide6.QtSvg","PySide6.QtNetwork","serial.tools.list_ports_linux"]
 echo a = Analysis^(
