@@ -1,5 +1,4 @@
 /.venv
-/dist-win
 /Output
 /build
 *.log

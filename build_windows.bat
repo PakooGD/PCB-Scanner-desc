@@ -4,7 +4,7 @@ chcp 65001 >nul
 
 REM ============================================================
 REM  PCB Microscope Scanner - Windows build
-REM  Double-click: builds dist-win\pcb-scanner.exe
+REM  Double-click: builds build\windows\dist-win\pcb-scanner.exe
 REM  and Output\PCB-Scanner-Setup.exe (if Inno Setup is installed).
 REM ============================================================
 
@@ -21,7 +21,7 @@ set "ROOT_PY=%ROOT:~0,-1%"
 cd /d "%ROOT%"
 
 set "BUILD_DIR=%ROOT%build\windows"
-set "DIST_DIR=%ROOT%dist-win"
+set "DIST_DIR=%ROOT%build\windows\dist-win"
 set "OUT_DIR=%ROOT%Output"
 
 echo ============================================================

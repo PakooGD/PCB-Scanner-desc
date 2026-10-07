@@ -1,153 +1,181 @@
-================================================================
- PCB Microscope Scanner — README
-================================================================
+# PCB Microscope Scanner
 
-Сканер плат под микроскопом: управление GRBL, камера, автосъёмка
-сетки, сетка снимков, RU/EN, демо-режим.
+Сканер плат под микроскопом: управление GRBL, камера, автосъёмка сетки,
+сетка снимков, RU/EN, демо-режим.
 
-----------------------------------------------------------------
-1. ЧТО НУЖНО ДЛЯ СБОРКИ
-----------------------------------------------------------------
+Проект собирается в два нативных приложения:
 
-Windows-сборка (build_windows.bat):
-  • Python 3.10+ с галочкой "Add to PATH"
-    https://www.python.org/downloads/windows/
-  • Inno Setup 6 (для .exe-инсталлятора)
-    https://jrsoftware.org/isdl.php
-    Если Inno Setup не установлен — соберётся только
-    dist-win\pcb-scanner.exe без инсталлятора.
+- **Windows** — установщик `PCB-Scanner-Setup.exe` (Inno Setup).
+- **Linux** — портативный `PCB_Microscope_Scanner-x86_64.AppImage` (один файл, без установки).
 
-Linux-сборка (build_linux.bat):
-  • Docker Desktop для Windows
-    https://docs.docker.com/desktop/setup/install/windows-install/
-    После установки — переключить в режим "Linux containers".
+Оба билда запускаются **двойным кликом** по `.bat` из корня проекта.
 
-----------------------------------------------------------------
-2. КАК СОБРАТЬ
-----------------------------------------------------------------
+---
 
-Двойной клик по нужному файлу:
+## 1. Требования
 
-  build_windows.bat   →  dist-win\pcb-scanner.exe
-                         Output\PCB-Scanner-Setup.exe
+### Для Windows-сборки (`build_windows.bat`)
 
-  build_linux.bat     →  Output\PCB_Microscope_Scanner-x86_64.AppImage
+- **Python 3.10+** с галочкой *Add Python to PATH*
+  [python.org/downloads/windows](https://www.python.org/downloads/windows/)
+- **Inno Setup 7** — для сборки `.exe`-инсталлятора
+  [jrsoftware.org/isdl.php](https://jrsoftware.org/isdl.php)
+  Если Inno Setup не установлен — соберётся только `dist-win\pcb-scanner.exe` без установщика.
 
-Первый запуск Linux-сборки занимает 3–8 минут (скачивается
-Ubuntu-образ и инструменты). Последующие — 1–2 минуты.
+### Для Linux-сборки (`build_linux.bat`)
 
-Все промежуточные файлы складываются в build\windows\ и
-build\linux\ — корень проекта остаётся чистым.
+- **Docker Desktop для Windows**
+  [docs.docker.com/desktop/setup/install/windows-install](https://docs.docker.com/desktop/setup/install/windows-install/)
+  После установки переключите Docker в режим **Linux containers** (правый клик по иконке в трее → Switch to Linux containers).
 
-----------------------------------------------------------------
-3. ЧТО ПОЯВЛЯЕТСЯ В OUTPUT
-----------------------------------------------------------------
+---
 
-  PCB-Scanner-Setup.exe
-      Установщик для Windows. Двойной клик — установка в
-      "C:\Program Files\PCB Microscope Scanner\", ярлыки в
-      меню Пуск и на рабочем столе, запись в "Программы и
-      компоненты", деинсталлятор unins000.exe.
+## 2. Сборка
 
-  PCB_Microscope_Scanner-x86_64.AppImage
-      Портативное приложение для Linux. Один файл, без установки.
+Двойной клик по нужному `.bat` в корне проекта:
 
-----------------------------------------------------------------
-4. КАК ПОЛЬЗОВАТЬСЯ ПОСЛЕ СБОРКИ
-----------------------------------------------------------------
+| Файл | Что получается |
+|---|---|
+| `build_windows.bat` | `dist-win\pcb-scanner.exe`<br>`Output\PCB-Scanner-Setup.exe` |
+| `build_linux.bat` | `Output\PCB_Microscope_Scanner-x86_64.AppImage` |
 
-Windows:
-  Запустить Output\PCB-Scanner-Setup.exe, следовать мастеру.
+- Первый запуск **Linux-сборки** занимает 3–8 минут — скачивается Ubuntu-образ и инструменты.
+- Последующие — 1–2 минуты.
+- Все промежуточные файлы складываются в `build\windows\` и `build\linux\` — **корень проекта остаётся чистым**.
 
-Linux:
-  Передать пользователю один файл PCB_Microscope_Scanner-x86_64.AppImage.
-  На целевой машине:
+---
 
-      chmod +x PCB_Microscope_Scanner-x86_64.AppImage
-      ./PCB_Microscope_Scanner-x86_64.AppImage
+## 3. Что появляется в `Output\`
 
-  Если система просит FUSE:
-      sudo apt install libfuse2      # Ubuntu / Debian
-      sudo dnf install fuse          # Fedora
-      sudo pacman -S fuse2           # Arch
+### `PCB-Scanner-Setup.exe`
 
-  Доступ к GRBL-порту (один раз, затем перелогиниться):
-      sudo usermod -aG dialout $USER
+Установщик для Windows. Двойной клик — установка в
+`C:\Program Files\PCB Microscope Scanner\`, ярлыки в меню «Пуск» и на
+рабочем столе, запись в «Программы и компоненты», деинсталлятор
+`unins000.exe`.
 
-----------------------------------------------------------------
-5. ГДЕ ХРАНЯТСЯ СНИМКИ
-----------------------------------------------------------------
+### `PCB_Microscope_Scanner-x86_64.AppImage`
 
-Windows:
-  %LOCALAPPDATA%\PCB-Microscope-Scanner\captures\
-  (C:\Users\<Имя>\AppData\Local\PCB-Microscope-Scanner\captures\)
+Портативное приложение для Linux. Один файл, без установки.
 
-Linux:
-  ~/.local/share/PCB-Microscope-Scanner/captures/
+---
 
-Папку можно изменить прямо в приложении: раздел "Снимки" →
-"Папка сохранения" → кнопка «…». Выбор запоминается.
+## 4. Как пользоваться после сборки
 
-----------------------------------------------------------------
-6. КОРЕНЬ ПРОЕКТА
-----------------------------------------------------------------
+### Windows
 
-  main.py
-  requirements.txt
-  static\logo.png       (256×256, RGBA, 8-bit — для AppImage)
-  static\logo.ico       (для иконки Windows .exe и установщика)
-  static\logo.svg       (опционально, для UI)
-  build_windows.bat
-  build_linux.bat
-  README.md
+Запустите `Output\PCB-Scanner-Setup.exe` и следуйте мастеру.
 
-----------------------------------------------------------------
-7. ОЧИСТКА
-----------------------------------------------------------------
+### Linux
 
-Удалить папки build\, dist-win\, dist-linux\, Output\, AppDir\
-и файл *.AppImage вручную, либо через:
+Передайте пользователю **один файл** `PCB_Microscope_Scanner-x86_64.AppImage`.
+На целевой машине:
 
-  rmdir /s /q build dist-win dist-linux Output
-  del /q *.AppImage
+```bash
+chmod +x PCB_Microscope_Scanner-x86_64.AppImage
+./PCB_Microscope_Scanner-x86_64.AppImage
+```
 
-Виртуальное окружение .venv тоже можно удалить:
-  rmdir /s /q .venv
+Если система просит FUSE:
 
-----------------------------------------------------------------
-8. ТИПИЧНЫЕ ПРОБЛЕМЫ
-----------------------------------------------------------------
+```bash
+sudo apt install libfuse2      # Ubuntu / Debian
+sudo dnf install fuse          # Fedora
+sudo pacman -S fuse2           # Arch
+```
 
-[Windows] "Python not found"
-  → Переустановите Python, отметив "Add Python to PATH".
+Доступ к GRBL-порту (один раз, затем перелогиниться):
 
-[Windows] Inno Setup не найден
-  → Установите Inno Setup 6 или используйте только
-    dist-win\pcb-scanner.exe без установщика.
+```bash
+sudo usermod -aG dialout $USER
+```
 
-[Linux] "Docker daemon is not running"
-  → Запустите Docker Desktop и дождитесь статуса Running.
+---
 
-[Linux] "Could not find suitable icon"
-  → static\logo.png должен быть квадратным 256×256 RGBA 8-bit.
-    Пересоздайте: python -c "from PIL import Image; im=Image.open('static/logo.png').convert('RGBA'); im.resize((256,256), Image.LANCZOS).save('static/logo.png')"
+## 5. Где хранятся снимки
 
-[Linux] AppImage не запускается у пользователя
-  → Установите libfuse2 (см. раздел 4).
+### Windows
 
-[GRBL] "Permission denied"
-  → Linux: sudo usermod -aG dialout $USER и перелогиниться.
-    Windows: драйвер CH340/CP210x + проверить COM-порт.
+```
+%LOCALAPPDATA%\PCB-Microscope-Scanner\captures\
+```
 
-----------------------------------------------------------------
-9. ОБНОВЛЕНИЕ ВЕРСИИ
-----------------------------------------------------------------
+то есть
 
-Откройте build_windows.bat, измените:
-    set "APP_VERSION=1.0.0"  →  set "APP_VERSION=1.0.1"
+```
+C:\Users\<Имя>\AppData\Local\PCB-Microscope-Scanner\captures\
+```
 
-Аналогично в build_linux.bat, если там есть версия.
-AppId в installer.iss НЕ меняйте — иначе Windows
-посчитает обновление новой программой.
+### Linux
 
-================================================================
+```
+~/.local/share/PCB-Microscope-Scanner/captures/
+```
+
+Папку можно изменить прямо в приложении:
+раздел **«Снимки» → «Папка сохранения» → кнопка «…»**.
+Выбор сохраняется между запусками.
+
+---
+
+## 6. Корень проекта
+
+```
+main.py
+requirements.txt
+static\logo.png       (256×256, RGBA, 8-bit — для AppImage)
+static\logo.ico       (для иконки Windows .exe и установщика)
+static\logo.svg       (опционально, для UI)
+build_windows.bat
+build_linux.bat
+README.md
+```
+
+---
+
+## 7. Очистка
+
+Удалить папки `build\`, `dist-win\`, `dist-linux\`, `Output\`, `AppDir\`
+и файлы `*.AppImage`:
+
+```bat
+rmdir /s /q build dist-win dist-linux Output
+del /q *.AppImage
+```
+
+Виртуальное окружение `.venv` тоже можно удалить:
+
+```bat
+rmdir /s /q .venv
+```
+
+При следующей сборке оно создастся заново.
+
+---
+
+## 8. Типичные проблемы
+
+| Симптом | Решение |
+|---|---|
+| **[Windows]** `Python not found` | Переустановите Python, отметив *Add Python to PATH*. |
+| **[Windows]** `Inno Setup not found` | Установите Inno Setup 7 или используйте только `dist-win\pcb-scanner.exe` без установщика. |
+| **[Linux]** `Docker daemon is not running` | Запустите Docker Desktop и дождитесь статуса *Running*. |
+| **[Linux]** `Could not find suitable icon` | `static\logo.png` должен быть **квадратным 256×256 RGBA 8-bit**. Пересоздайте:<br>`python -c "from PIL import Image; im=Image.open('static/logo.png').convert('RGBA'); im.resize((256,256), Image.LANCZOS).save('static/logo.png')"` |
+| **[Linux]** AppImage не запускается | Установите `libfuse2` (см. раздел 4). |
+| **[GRBL]** `Permission denied` | Linux: `sudo usermod -aG dialout $USER` и перелогиниться.<br>Windows: драйвер CH340/CP210x + проверить COM-порт. |
+
+---
+
+## 9. Обновление версии
+
+Откройте `build_windows.bat` и измените:
+
+```bat
+set "APP_VERSION=1.0.0"     →     set "APP_VERSION=1.0.1"
+```
+
+Аналогично в `build_linux.bat`, если там задана версия.
+
+> **Важно:** `AppId` в `installer.iss` (генерируется автоматически)
+> **не меняйте** между версиями — иначе Windows посчитает обновление
+> новой программой и поставит её рядом, а не поверх.
