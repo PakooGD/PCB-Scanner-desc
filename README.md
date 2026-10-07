@@ -20,13 +20,12 @@
   [python.org/downloads/windows](https://www.python.org/downloads/windows/)
 - **Inno Setup 7** — для сборки `.exe`-инсталлятора
   [jrsoftware.org/isdl.php](https://jrsoftware.org/isdl.php)
-  Если Inno Setup не установлен — соберётся только `dist-win\pcb-scanner.exe` без установщика.
+  Если Inno Setup не установлен — соберётся только `build\windows\dist-win\pcb-scanner.exe` без установщика.
 
 ### Для Linux-сборки (`build_linux.bat`)
 
 - **Docker Desktop для Windows**
   [docs.docker.com/desktop/setup/install/windows-install](https://docs.docker.com/desktop/setup/install/windows-install/)
-  После установки переключите Docker в режим **Linux containers** (правый клик по иконке в трее → Switch to Linux containers).
 
 ---
 
@@ -36,7 +35,7 @@
 
 | Файл | Что получается |
 |---|---|
-| `build_windows.bat` | `dist-win\pcb-scanner.exe`<br>`Output\PCB-Scanner-Setup.exe` |
+| `build_windows.bat` | `build\windows\dist-win\pcb-scanner.exe`<br>`Output\PCB-Scanner-Setup.exe` |
 | `build_linux.bat` | `Output\PCB_Microscope_Scanner-x86_64.AppImage` |
 
 - Первый запуск **Linux-сборки** занимает 3–8 минут — скачивается Ubuntu-образ и инструменты.
@@ -68,7 +67,6 @@
 
 ### Linux
 
-Передайте пользователю **один файл** `PCB_Microscope_Scanner-x86_64.AppImage`.
 На целевой машине:
 
 ```bash
@@ -135,12 +133,10 @@ README.md
 
 ## 7. Очистка
 
-Удалить папки `build\`, `dist-win\`, `dist-linux\`, `Output\`, `AppDir\`
-и файлы `*.AppImage`:
+Удалить папки `build\`, `Output\`
 
 ```bat
-rmdir /s /q build dist-win dist-linux Output
-del /q *.AppImage
+rmdir /s /q build Output
 ```
 
 Виртуальное окружение `.venv` тоже можно удалить:
@@ -158,9 +154,9 @@ rmdir /s /q .venv
 | Симптом | Решение |
 |---|---|
 | **[Windows]** `Python not found` | Переустановите Python, отметив *Add Python to PATH*. |
-| **[Windows]** `Inno Setup not found` | Установите Inno Setup 7 или используйте только `dist-win\pcb-scanner.exe` без установщика. |
+| **[Windows]** `Inno Setup not found` | Установите Inno Setup 7 или используйте только `build\windows\dist-win\pcb-scanner.exe` без установщика. |
 | **[Linux]** `Docker daemon is not running` | Запустите Docker Desktop и дождитесь статуса *Running*. |
-| **[Linux]** `Could not find suitable icon` | `static\logo.png` должен быть **квадратным 256×256 RGBA 8-bit**. Пересоздайте:<br>`python -c "from PIL import Image; im=Image.open('static/logo.png').convert('RGBA'); im.resize((256,256), Image.LANCZOS).save('static/logo.png')"` |
+| **[Linux]** `Could not find suitable icon` | `static\logo.png` должен быть **квадратным 256×256 RGBA 8-bit**. |
 | **[Linux]** AppImage не запускается | Установите `libfuse2` (см. раздел 4). |
 | **[GRBL]** `Permission denied` | Linux: `sudo usermod -aG dialout $USER` и перелогиниться.<br>Windows: драйвер CH340/CP210x + проверить COM-порт. |
 
@@ -168,13 +164,11 @@ rmdir /s /q .venv
 
 ## 9. Обновление версии
 
-Откройте `build_windows.bat` и измените:
+Откройте `*.bat` и измените:
 
 ```bat
 set "APP_VERSION=1.0.0"     →     set "APP_VERSION=1.0.1"
 ```
-
-Аналогично в `build_linux.bat`, если там задана версия.
 
 > **Важно:** `AppId` в `installer.iss` (генерируется автоматически)
 > **не меняйте** между версиями — иначе Windows посчитает обновление
