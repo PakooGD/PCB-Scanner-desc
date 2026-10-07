@@ -1,6 +1,5 @@
-/AppDir
-/dist
-/Installers
+/.venv
+/dist-win
 /Output
 /build
 *.log

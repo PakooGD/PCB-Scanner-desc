@@ -1,8 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=PCB Microscope Scanner
-Comment=Scanner for PCB inspection
-Exec=pcb-scanner
-Icon=logo
-Terminal=false
-Categories=Utility;Science;
